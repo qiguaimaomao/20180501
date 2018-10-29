@@ -7,6 +7,10 @@ public class Trader {
 	this.name = n;
 	this.city = c;
 	}
+	public Trader() {
+		name="";
+		city="";
+	}
 	public String getName(){
 	return this.name;
 	}
