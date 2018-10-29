@@ -1,5 +1,6 @@
 package java8.chapter14;
 
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 class LazyList<T> implements MyList<T>{
@@ -21,6 +22,14 @@ return false;
 
 public static LazyList<Integer> from(int n) {
 return new LazyList<Integer>(n, () -> from(n+1));
+}
+
+public MyList<T> filter(Predicate<T> p) {
+return isEmpty() ?
+this :
+p.test(head()) ?
+new LazyList<>(head(), () -> tail().filter(p)) :
+tail().filter(p);
 }
 
 public static void main(String[] args) {
