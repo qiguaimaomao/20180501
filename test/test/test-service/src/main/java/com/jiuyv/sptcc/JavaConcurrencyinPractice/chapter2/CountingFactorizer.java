@@ -19,7 +19,7 @@ import net.jcip.annotations.ThreadSafe;
  */
 @ThreadSafe
 public class CountingFactorizer implements Servlet{
-private AtomicLong count;
+private final AtomicLong count=new AtomicLong(0);
 public long getCount() {
 	return count.get();
 }
