@@ -88,7 +88,7 @@ public static void main(String[] args) {
 	System.out.println(timeFromInstant);
 	System.out.println(Instant.now());
 	Thread.yield();
-	
+	Math.random();
 }
 
 
