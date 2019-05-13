@@ -9,20 +9,17 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
+import com.jiuyv.sptcc.JavaConcurrencyinPractice.chapter3.OneValueCache;
+
+import net.jcip.annotations.GuardedBy;
 import net.jcip.annotations.NotThreadSafe;
+import net.jcip.annotations.ThreadSafe;
 /**
- * 
  * @author jiuyv
- *当一个不变约束涉及到多个变量时，变量之间不是彼此独立的，某个变量的值会制约其他几个变量的值。
- *因此更新一个变量的时候，要在同一原子操作中更新其他几个。
  */
-@NotThreadSafe
-public class UnsafeCacheFactorizer {
-	/**
-	 * 存在不变约束：lastFactors中的各个因子的乘积应该等于lastNumber
-	 */
-	private final AtomicReference<BigInteger> lastNumber=new AtomicReference<BigInteger>();
-	private final AtomicReference<BigInteger[]> lastFactors=new AtomicReference<BigInteger[]>();
+@ThreadSafe
+public class VolatileCachedFactorizer {
+private volatile OneValueCache cache=new OneValueCache(null, null); 
 
 		public void init(ServletConfig config) throws ServletException {
 			// TODO Auto-generated method stub
@@ -34,17 +31,15 @@ public class UnsafeCacheFactorizer {
 			return null;
 		}
 
-		public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException {
+		public synchronized void  service(ServletRequest req, ServletResponse res) throws ServletException, IOException {
 			BigInteger i=exetractFromRequset(req);
-			if (i.equals(lastNumber.get())) {
-				encodeIntoRespose(res,lastFactors.get());
-			}else {
-				BigInteger[] factors=factor(i);
-				lastNumber.set(i);
-				lastFactors.set(factors);
-				encodeIntoRespose(res,factors);
+			BigInteger[] factors=cache.getFactors(i);
+			if(factors==null) {
+				factors=factor(i);
+				cache=new OneValueCache(i, factors);
+				
 			}
-			
+			encodeIntoRespose(res,factors);
 		}
 
 		private void encodeIntoRespose(ServletResponse res, BigInteger[] factors) {

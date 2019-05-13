@@ -9,19 +9,23 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
+import net.jcip.annotations.GuardedBy;
 import net.jcip.annotations.NotThreadSafe;
+import net.jcip.annotations.ThreadSafe;
 /**
- * 
+ * 内部锁，扮演互斥锁的角色
+ * synchronized块有两个部分，锁对象的引用，以及这个锁保护的代码块
+ * 性能不好
  * @author jiuyv
- *当一个不变约束涉及到多个变量时，变量之间不是彼此独立的，某个变量的值会制约其他几个变量的值。
- *因此更新一个变量的时候，要在同一原子操作中更新其他几个。
  */
-@NotThreadSafe
-public class UnsafeCacheFactorizer {
+@ThreadSafe
+public class SynchronizedFactorizer {
 	/**
 	 * 存在不变约束：lastFactors中的各个因子的乘积应该等于lastNumber
 	 */
+	@GuardedBy("this")
 	private final AtomicReference<BigInteger> lastNumber=new AtomicReference<BigInteger>();
+	@GuardedBy("this")
 	private final AtomicReference<BigInteger[]> lastFactors=new AtomicReference<BigInteger[]>();
 
 		public void init(ServletConfig config) throws ServletException {
@@ -34,7 +38,7 @@ public class UnsafeCacheFactorizer {
 			return null;
 		}
 
-		public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException {
+		public synchronized void  service(ServletRequest req, ServletResponse res) throws ServletException, IOException {
 			BigInteger i=exetractFromRequset(req);
 			if (i.equals(lastNumber.get())) {
 				encodeIntoRespose(res,lastFactors.get());

@@ -9,21 +9,36 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
+import net.jcip.annotations.GuardedBy;
 import net.jcip.annotations.NotThreadSafe;
+import net.jcip.annotations.ThreadSafe;
 /**
- * 
+ * 缩小synchronized块，去掉原子变量
+ * 使用两种不同的同步机制会引起混淆，而性能与安全也不会从中得到额外的好处
  * @author jiuyv
- *当一个不变约束涉及到多个变量时，变量之间不是彼此独立的，某个变量的值会制约其他几个变量的值。
- *因此更新一个变量的时候，要在同一原子操作中更新其他几个。
  */
-@NotThreadSafe
-public class UnsafeCacheFactorizer {
+@ThreadSafe
+public class CachedFactorizer {
 	/**
 	 * 存在不变约束：lastFactors中的各个因子的乘积应该等于lastNumber
 	 */
-	private final AtomicReference<BigInteger> lastNumber=new AtomicReference<BigInteger>();
-	private final AtomicReference<BigInteger[]> lastFactors=new AtomicReference<BigInteger[]>();
-
+	@GuardedBy("this")
+	private BigInteger lastNumber;
+	@GuardedBy("this")
+	private BigInteger[] lastFactors;
+	@GuardedBy("this")
+	private long hits;
+	@GuardedBy("this")
+	private long cacheHits;
+	
+	public synchronized long getHits() {
+		return hits;
+	}
+	
+	public double getCacheHitsRatio() {
+		return (double)cacheHits/(double)hits;
+	}
+	
 		public void init(ServletConfig config) throws ServletException {
 			// TODO Auto-generated method stub
 			
@@ -34,17 +49,26 @@ public class UnsafeCacheFactorizer {
 			return null;
 		}
 
-		public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException {
+		public  void  service(ServletRequest req, ServletResponse res) throws ServletException, IOException {
 			BigInteger i=exetractFromRequset(req);
-			if (i.equals(lastNumber.get())) {
-				encodeIntoRespose(res,lastFactors.get());
-			}else {
-				BigInteger[] factors=factor(i);
-				lastNumber.set(i);
-				lastFactors.set(factors);
-				encodeIntoRespose(res,factors);
+			BigInteger[] factors=null;
+			synchronized (this) {
+				hits++;
+				if (i.equals(lastNumber)) {
+					cacheHits++;
+					factors=lastFactors.clone();
+				}
 			}
 			
+			if (factors==null) {
+				factors=factor(i);
+				synchronized (this) {
+					lastNumber=i;
+					lastFactors=factors.clone();
+				}
+				
+			}
+			encodeIntoRespose(res,factors);	
 		}
 
 		private void encodeIntoRespose(ServletResponse res, BigInteger[] factors) {

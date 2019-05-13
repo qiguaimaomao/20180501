@@ -3,7 +3,7 @@ package test1.thisEscape;
 public class ThisEscape {
 	 private final int id;
 	 private final String name;
-	 private ThreadLocal<String> threadLocal=ThreadLocal.withInitial(()->"123");
+	 public static ThreadLocal<String> threadLocal=ThreadLocal.withInitial(()->String.valueOf(System.currentTimeMillis()));
 	 public String getName() {
 		return name;
 	}
