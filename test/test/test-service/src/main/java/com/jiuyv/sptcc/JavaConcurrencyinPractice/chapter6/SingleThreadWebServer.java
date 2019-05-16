@@ -18,7 +18,7 @@ public static void main(String[] args) throws IOException {
 }
 
 private static void handleRequest(Socket socket) {
-	// TODO Auto-generated method stub
+	char ch=10;
 	
 }
 }
