@@ -14,8 +14,16 @@ public LogServiceByExecutor(PrintWriter writer) {
 	this.writer=writer;
 }
 public void start() {
-	// TODO Auto-generated method stub
-
+	Runtime.getRuntime().addShutdownHook(new Thread() {
+		@Override
+		public void run() {
+			try {
+				LogServiceByExecutor.this.stop();
+			} catch (Exception e) {
+				// TODO: handle exception
+			};
+		}
+	});
 }
 
 public void stop() throws InterruptedException {
