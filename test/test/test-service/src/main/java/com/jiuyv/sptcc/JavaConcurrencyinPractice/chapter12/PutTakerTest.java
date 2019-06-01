@@ -17,11 +17,14 @@ private final AtomicInteger takesum=new AtomicInteger();
 private final CyclicBarrier cb;
 private final BoundedBuffer<Integer> bb;
 private final int npairs,ntrails;
+private final BarrierTimer bt;
 public PutTakerTest(int capacity,int npairs,int ntrails) {
-	this.cb=new CyclicBarrier(2*npairs+1);
+	bt=new BarrierTimer();
+	this.cb=new CyclicBarrier(2*npairs+1,bt);
 	this.bb=new BoundedBuffer<Integer>(capacity);
 	this.npairs=npairs;
 	this.ntrails=ntrails;
+	
 }
 
 private void test() {
@@ -35,6 +38,7 @@ private void test() {
 		System.out.println(putsum.get());
 		System.out.println(takesum.get());
 		System.out.println(putsum.get()==takesum.get());
+		System.out.println(bt.getTime());
 	} catch (Exception e) {
 		throw new RuntimeException(e);
 	}
