@@ -23,7 +23,7 @@ public class SleepyBoundedBuffer<V> extends BaseBoundedBuffer<V>{
 
 	}
 	
-	public synchronized V get() throws InterruptedException {
+	public  V get() throws InterruptedException {
 		while (true) {
 			synchronized (this) {
 				if (!isEmpty()) {
