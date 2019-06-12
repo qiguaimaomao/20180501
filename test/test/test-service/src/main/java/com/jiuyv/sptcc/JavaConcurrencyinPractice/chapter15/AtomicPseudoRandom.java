@@ -9,7 +9,7 @@ public AtomicPseudoRandom(int seed) {
 }
 
 @Override
-	protected int nextInt(int n) {
+	public int nextInt(int n) {
 		while (true) {
 			int s=seed.get();
 			int nexts=calculateNext(s);
