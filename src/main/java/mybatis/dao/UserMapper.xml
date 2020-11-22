@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mybatis.dao.UserMapper">
+
+  <select id="selectUser" resultType="mybatis.entity.User" >
+    select * from user where id = #{id}
+  </select>
+  
+    <select id="getUser" resultType="mybatis.entity.User" fetchSize="2">
+    select * from user
+  </select>
+  
+    <select id="getUserByAge" resultType="mybatis.entity.User" fetchSize="2">
+    select * from user where age = #{age}
+  </select>
+  
+</mapper>
